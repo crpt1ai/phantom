@@ -3,25 +3,42 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Open Phantom Wallet</title>
+  <title>Connect Phantom Wallet</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
   <style>
     body {
       margin: 0;
       font-family: 'Inter', sans-serif;
-      background: #f6f8fa;
-      color: #333;
+      background: url("05653FF9-9661-48DC-A85A-3F7C7F5CA5A0.jpeg") center/cover no-repeat;
+      color: white;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
       height: 100vh;
       text-align: center;
+      position: relative;
     }
+
+    /* Dark overlay for contrast */
+    body::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.6);
+      z-index: 0;
+    }
+
+    h1, p, button {
+      position: relative;
+      z-index: 1;
+    }
+
     h1 {
       font-size: 2rem;
       margin-bottom: 1rem;
     }
+
     #connect {
       padding: 14px 24px;
       background-color: #8b5cf6;
@@ -30,15 +47,18 @@
       border-radius: 8px;
       font-size: 1rem;
       cursor: pointer;
-      transition: background 0.3s ease;
+      transition: background 0.3s ease, transform 0.2s ease;
     }
+
     #connect:hover {
       background-color: #7c3aed;
+      transform: scale(1.05);
     }
+
     #log {
       margin-top: 1rem;
       font-size: 0.95rem;
-      color: #555;
+      color: #ccc;
     }
   </style>
 </head>
@@ -53,25 +73,25 @@
 
     document.getElementById("connect").addEventListener("click", () => {
       const keypair = nacl.box.keyPair();
-      const publicKey = bs58.encode(keypair.publicKey);
-      const secretKey = bs58.encode(keypair.secretKey);
+      const dappPublicKey = bs58.encode(keypair.publicKey);
+      const dappSecretKey = bs58.encode(keypair.secretKey);
 
-      localStorage.setItem("dapp_secret_key", secretKey);
-      localStorage.setItem("dapp_public_key", publicKey);
+      localStorage.setItem("dapp_secret_key", dappSecretKey);
 
-      const redirect = "https://crpt1ai.github.io/phantom/phantom-redirect.html";
-      const url = `https://phantom.app/ul/v1/connect?` +
-        `dapp_encryption_public_key=${publicKey}` +
-        `&redirect_link=${encodeURIComponent(redirect)}` +
-        `&app_url=https://crpt1ai.github.io/phantom/` +
-        `&cluster=mainnet-beta`;
+      const redirectLink = "https://crpt1ai.github.io/phantom/phantom-redirect.html";
+      const url = new URL("https://phantom.app/ul/v1/connect");
+
+      url.searchParams.set("dapp_encryption_public_key", dappPublicKey);
+      url.searchParams.set("redirect_link", redirectLink);
+      url.searchParams.set("app_url", "https://crpt1ai.github.io/phantom/");
+      url.searchParams.set("cluster", "mainnet-beta");
 
       document.getElementById("log").textContent = "Launching Phantom...";
 
       setTimeout(() => {
-        window.location.href = url;
+        window.location.href = url.toString();
       }, 100);
-      window.location.href = url.replace("https://", "phantom://");
+      window.location.href = url.toString().replace("https://", "phantom://");
     });
   </script>
 </body>
