@@ -1,18 +1,19 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
   <meta charset="UTF-8">
-  <title>Connect Phantom Wallet</title>
+  <title>Connect Phantom</title>
 </head>
 <body>
   <h1>Connect Your Phantom Wallet</h1>
-  <button onclick="connectPhantom()">Connect Phantom</button>
+  <button id="connect">Connect Phantom</button>
+  <p id="log"></p>
 
   <script type="module">
     import nacl from "https://cdn.skypack.dev/tweetnacl@1.0.3";
     import bs58 from "https://cdn.skypack.dev/bs58@5.0.0";
 
-    async function connectPhantom() {
+    document.getElementById("connect").addEventListener("click", () => {
       const keypair = nacl.box.keyPair();
       const publicKey = bs58.encode(keypair.publicKey);
       const secretKey = bs58.encode(keypair.secretKey);
@@ -20,15 +21,21 @@
       localStorage.setItem("dapp_secret_key", secretKey);
       localStorage.setItem("dapp_public_key", publicKey);
 
-      const redirect = "https://crpt1ai.gihub.io/phantom-redirect.html";
+      const redirect = "https://crpt1ai.github.io/phantom/phantom-redirect.html";
       const url = `https://phantom.app/ul/v1/connect?` +
         `dapp_encryption_public_key=${publicKey}` +
         `&redirect_link=${encodeURIComponent(redirect)}` +
-        `&app_url=https://yourapp.com` +
+        `&app_url=https://crpt1ai.github.io/phantom/` +
         `&cluster=mainnet-beta`;
 
-      window.location.href = url;
-    }
+      document.getElementById("log").textContent = "Link: " + url;
+
+      // Try app link first
+      setTimeout(() => {
+        window.location.href = url;
+      }, 100);
+      window.location.href = url.replace("https://", "phantom://");
+    });
   </script>
 </body>
 </html>
