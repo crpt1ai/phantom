@@ -1,78 +1,30 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Connect Phantom Wallet</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
-  <style>
-    body {
-      margin: 0;
-      font-family: 'Inter', sans-serif;
-      background: #f6f8fa;
-      color: #333;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      height: 100vh;
-      text-align: center;
-    }
-    h1 {
-      font-size: 2rem;
-      margin-bottom: 1rem;
-    }
-    #connect {
-      padding: 14px 24px;
-      background-color: #8b5cf6;
-      color: white;
-      border: none;
-      border-radius: 8px;
-      font-size: 1rem;
-      cursor: pointer;
-      transition: background 0.3s ease;
-    }
-    #connect:hover {
-      background-color: #7c3aed;
-    }
-    #log {
-      margin-top: 1rem;
-      font-size: 0.95rem;
-      color: #555;
-    }
-  </style>
-</head>
-<body>
-  <h1>Welcome to People Crypto</h1>
-  <button id="connect">Connect Phantom Wallet</button>
-  <p id="log">Securely connect your wallet to get started.</p>
+<script type="module">
+  import nacl from "https://cdn.skypack.dev/tweetnacl@1.0.3";
+  import bs58 from "https://cdn.skypack.dev/bs58@5.0.0";
 
-  <script type="module">
-    import nacl from "https://cdn.skypack.dev/tweetnacl@1.0.3";
-    import bs58 from "https://cdn.skypack.dev/bs58@5.0.0";
+  document.getElementById("connect").addEventListener("click", () => {
+    const keypair = nacl.box.keyPair();
+    const dappPublicKey = bs58.encode(keypair.publicKey);
+    const dappSecretKey = bs58.encode(keypair.secretKey);
 
-    document.getElementById("connect").addEventListener("click", () => {
-      const keypair = nacl.box.keyPair();
-      const publicKey = bs58.encode(keypair.publicKey);
-      const secretKey = bs58.encode(keypair.secretKey);
+    // Save locally for decrypting the redirect response later
+    localStorage.setItem("dapp_secret_key", dappSecretKey);
 
-      localStorage.setItem("dapp_secret_key", secretKey);
-      localStorage.setItem("dapp_public_key", publicKey);
+    const redirectLink = "https://crpt1ai.github.io/phantom/phantom-redirect.html";
+    const url = new URL("https://phantom.app/ul/v1/connect");
 
-      const redirect = "https://crpt1ai.github.io/phantom/phantom-redirect.html";
-      const url = `https://phantom.app/ul/v1/connect?` +
-        `dapp_encryption_public_key=${publicKey}` +
-        `&redirect_link=${encodeURIComponent(redirect)}` +
-        `&app_url=https://crpt1ai.github.io/phantom/` +
-        `&cluster=mainnet-beta`;
+    url.searchParams.set("dapp_encryption_public_key", dappPublicKey);
+    url.searchParams.set("redirect_link", redirectLink);
+    url.searchParams.set("app_url", "https://crpt1ai.github.io/phantom/");
+    url.searchParams.set("cluster", "mainnet-beta");
 
-      document.getElementById("log").textContent = "Launching Phantom...";
+    const httpsURL = url.toString();
+    const phantomURL = httpsURL.replace("https://", "phantom://");
 
-      setTimeout(() => {
-        window.location.href = url;
-      }, 100);
-      window.location.href = url.replace("https://", "phantom://");
-    });
-  </script>
-</body>
-</html>
+    // Try to open the app first
+    setTimeout(() => {
+      window.location.href = httpsURL;
+    }, 100);
+    window.location.href = phantomURL;
+  });
+</script>
