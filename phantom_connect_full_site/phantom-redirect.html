@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Phantom Wallet Connected</title>
+</head>
+<body>
+  <h1>Connecting to Phantom...</h1>
+  <script type="module">
+    import nacl from "https://cdn.skypack.dev/tweetnacl@1.0.3";
+    import bs58 from "https://cdn.skypack.dev/bs58@5.0.0";
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const phantomEncryptionPubKey = urlParams.get("phantom_encryption_public_key");
+    const nonce = urlParams.get("nonce");
+    const data = urlParams.get("data");
+
+    const dappSecretKey = bs58.decode(localStorage.getItem("dapp_secret_key"));
+    const phantomPubKeyDecoded = bs58.decode(phantomEncryptionPubKey);
+    const sharedSecret = nacl.box.before(phantomPubKeyDecoded, dappSecretKey);
+
+    const decryptedData = nacl.box.open.after(
+      bs58.decode(data),
+      bs58.decode(nonce),
+      sharedSecret
+    );
+
+    const decodedText = new TextDecoder().decode(decryptedData);
+    const response = JSON.parse(decodedText);
+
+    document.body.innerHTML = `
+      <h2>Wallet Connected!</h2>
+      <p><strong>Public Key:</strong> ${response.public_key}</p>
+      <p><strong>Session Token:</strong> ${response.session}</p>
+    `;
+  </script>
+</body>
+</html>
