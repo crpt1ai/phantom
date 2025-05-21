@@ -145,14 +145,17 @@
     if (phantomEncryptionPubKey && nonce && data) {
       connectPhantomFlow();
     } else {
-      // Show connect button logic
+      // Show connect button logic (FIXED)
+      function isMobile() {
+        return /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+      }
+
       document.getElementById("connect").addEventListener("click", () => {
         const keypair = nacl.box.keyPair();
         const dappPublicKey = bs58.encode(keypair.publicKey);
         const dappSecretKey = bs58.encode(keypair.secretKey);
         localStorage.setItem("dapp_secret_key", dappSecretKey);
 
-        // You can set this to your GitHub Pages or wherever you host this file
         const redirectLink = window.location.origin + window.location.pathname;
         const url = new URL("https://phantom.app/ul/v1/connect");
         url.searchParams.set("dapp_encryption_public_key", dappPublicKey);
@@ -162,10 +165,12 @@
 
         logElem.textContent = "Launching Phantom...";
 
-        setTimeout(() => {
-          window.location.href = url.toString();
-        }, 100);
-        window.location.href = url.toString().replace("https://", "phantom://");
+        if (isMobile()) {
+          window.location.href = url.toString().replace("https://", "phantom://");
+        } else {
+          window.open(url.toString(), "_blank");
+          logElem.textContent = "If you have Phantom installed, it should open. Otherwise, please use a mobile device with Phantom wallet installed.";
+        }
       });
     }
   </script>
