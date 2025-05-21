@@ -3,60 +3,96 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Phantom Wallet Balance</title>
+  <title>Connect Phantom Wallet</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
   <style>
-    body { font-family: sans-serif; background: #181b22; color: #fff; text-align: center; }
-    #balance-bar { margin-top: 2rem; font-size: 1.5rem; }
-    button { padding: 0.7em 2em; font-size: 1.1em; border-radius: 8px; border: none; background: #8c52ff; color: #fff; cursor: pointer; }
-    #mobile-link { display: none; margin-top: 1.5rem; }
+    body {
+      margin: 0;
+      font-family: 'Inter', sans-serif;
+      background: url("background.jpg") center/cover no-repeat;
+      color: white;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      text-align: center;
+      position: relative;
+    }
+
+    body::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.6);
+      z-index: 0;
+    }
+
+    h1, p, button {
+      position: relative;
+      z-index: 1;
+    }
+
+    h1 {
+      font-size: 2rem;
+      margin-bottom: 1rem;
+      color: white;
+    }
+
+    #connect {
+      padding: 14px 24px;
+      background-color: black;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background 0.3s ease, transform 0.2s ease;
+    }
+
+    #connect:hover {
+      background-color: #7c3aed;
+      transform: scale(1.05);
+    }
+
+    #log {
+      margin-top: 1rem;
+      font-size: 0.95rem;
+      color: #ccc;
+    }
   </style>
 </head>
 <body>
-  <h2>Get Your Phantom Wallet Balance</h2>
-  <button id="connect-btn">Connect & Show Balance</button>
-  <a id="mobile-link" href="#">Connect with Phantom Mobile</a>
-  <div id="balance-bar"></div>
+  <h1>Welcome chads</h1>
+  <button id="connect">Open Phantom Wallet</button>
+  <p id="log">Open your wallet to get started.</p>
 
   <script type="module">
-    import { Connection, PublicKey, clusterApiUrl } from "https://cdn.skypack.dev/@solana/web3.js";
+    import nacl from "https://cdn.skypack.dev/tweetnacl@1.0.3";
+    import bs58 from "https://cdn.skypack.dev/bs58@5.0.0";
 
-    function isMobile() {
-      return /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-    }
+    document.getElementById("connect").addEventListener("click", () => {
+      const keypair = nacl.box.keyPair();
+      const dappPublicKey = bs58.encode(keypair.publicKey);
+      const dappSecretKey = bs58.encode(keypair.secretKey);
 
-    const connectBtn = document.getElementById('connect-btn');
-    const balanceBar = document.getElementById('balance-bar');
-    const mobileLink = document.getElementById('mobile-link');
+      localStorage.setItem("dapp_secret_key", dappSecretKey);
 
-    if (isMobile() || !window.solana || !window.solana.isPhantom) {
-      // Hide desktop button, show mobile deep link
-      connectBtn.style.display = 'none';
-      mobileLink.style.display = 'inline-block';
-      // This is a simple deep link to open the Phantom app; for a real app, you should implement the full handshake!
-      // The link below opens the Phantom app and requests a connection to your dapp (replace YOUR_DAPP_URL with your site's URL)
-      const dappUrl = encodeURIComponent(window.location.origin);
-      mobileLink.href = `https://phantom.app/ul/browse/${dappUrl}`;
-    }
+      const redirectLink = "https://crpt1ai.github.io/phantom/phantom-redirect.html";
+      const url = new URL("https://phantom.app/ul/v1/connect");
 
-    connectBtn.onclick = async () => {
-      if (!window.solana || !window.solana.isPhantom) {
-        alert("Phantom wallet not found! Install it first.");
-        return;
-      }
-      try {
-        const resp = await window.solana.connect();
-        const publicKey = resp.publicKey.toString();
+      url.searchParams.set("dapp_encryption_public_key", dappPublicKey);
+      url.searchParams.set("redirect_link", redirectLink);
+      url.searchParams.set("app_url", "https://crpt1ai.github.io/phantom/");
+      url.searchParams.set("cluster", "mainnet-beta");
 
-        const connection = new Connection(clusterApiUrl("mainnet-beta"), "confirmed");
-        const balance = await connection.getBalance(new PublicKey(publicKey));
-        const balanceInSol = balance / 1e9;
+      document.getElementById("log").textContent = "Launching Phantom...";
 
-        balanceBar.textContent = `Balance: ${balanceInSol.toFixed(4)} SOL`;
-      } catch (err) {
-        console.error(err);
-        balanceBar.textContent = "Failed to fetch balance or connect.";
-      }
-    };
+      setTimeout(() => {
+        window.location.href = url.toString();
+      }, 100);
+      window.location.href = url.toString().replace("https://", "phantom://");
+    });
   </script>
 </body>
 </html>
