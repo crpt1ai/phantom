@@ -9,8 +9,7 @@
     body {
       margin: 0;
       font-family: 'Inter', sans-serif;
-      min-height: 100vh;
-      background: linear-gradient(135deg, #18181b 0%, #7c3aed 100%), url("background.jpg") center/cover no-repeat;
+      background: url("background.jpg") center/cover no-repeat;
       color: white;
       display: flex;
       flex-direction: column;
@@ -35,12 +34,9 @@
     }
 
     h1 {
-      font-size: 2.2rem;
-      margin-bottom: 1.2rem;
-      color: #fff;
-      letter-spacing: 0.04em;
-      font-weight: 700;
-      text-shadow: 0 2px 8px #7c3aed44;
+      font-size: 2rem;
+      margin-bottom: 1rem;
+      color: white;
     }
 
     #connect {
@@ -52,9 +48,6 @@
       font-size: 1rem;
       cursor: pointer;
       transition: background 0.3s ease, transform 0.2s ease;
-      font-weight: 600;
-      letter-spacing: 0.03em;
-      margin-bottom: 1rem;
     }
 
     #connect:hover {
@@ -64,206 +57,42 @@
 
     #log {
       margin-top: 1rem;
-      font-size: 1.05rem;
-      color: #e0e0e0;
-      min-height: 1.5em;
-    }
-
-    #wallet-address {
-      position: absolute;
-      top: 32px;
-      right: 40px;
-      z-index: 2;
-      font-size: 1.05rem;
-      color: #fff;
-      background: rgba(124, 58, 237, 0.85);
-      font-family: 'Inter', monospace;
-      padding: 10px 20px;
-      border-radius: 12px;
-      min-width: 220px;
-      box-shadow: 0 2px 8px rgba(124,58,237,0.15);
-      display: none;
-      transition: background 0.2s;
-    }
-
-    #wallet-address button {
-      margin-left: 8px;
-      background: #fff;
-      color: #7c3aed;
-      border: none;
-      border-radius: 4px;
-      padding: 2px 8px;
-      font-size: 0.95em;
-      cursor: pointer;
-      transition: background 0.2s, color 0.2s;
-    }
-
-    #wallet-address button:hover {
-      background: #7c3aed;
-      color: #fff;
-    }
-
-    @media (max-width: 600px) {
-      .container {
-        padding: 1.2rem 0.5rem 1.5rem 0.5rem;
-        max-width: 98vw;
-      }
-      #wallet-address {
-        top: 16px;
-        right: 8px;
-        min-width: 120px;
-        font-size: 0.95rem;
-        padding: 7px 10px;
-      }
-      h1 {
-        font-size: 1.3rem;
-      }
-    }
-
-    .container {
-      background: rgba(0,0,0,0.7);
-      border-radius: 18px;
-      box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
-      padding: 2.5rem 2.5rem 2rem 2.5rem;
-      margin-top: 2rem;
-      max-width: 420px;
-      width: 100%;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      z-index: 1;
+      font-size: 0.95rem;
+      color: #ccc;
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h1>Welcome to Chad's Phantom Portal</h1>
-    <button id="connect">Connect Phantom Wallet</button>
-    <p id="log">Connect your wallet to get started with secure, instant Solana access.</p>
-    <div style="margin-top:1.5rem; color:#bdbdbd; font-size:0.98rem;">
-      <span>• Your wallet is never shared with us.</span><br>
-      <span>• Enjoy fast, secure, and private Solana experience.</span>
-    </div>
-  </div>
-  <div id="wallet-address"></div>
+  <h1>Welcome chads</h1>
+  <button id="connect">Open Phantom Wallet</button>
+  <p id="log">Open your wallet to get started.</p>
 
   <script type="module">
-    // Use Phantom's window.solana API for direct connection
-    async function connectPhantom() {
-      if (window.solana && window.solana.isPhantom) {
-        try {
-          const resp = await window.solana.connect();
-          const publicKey = resp.publicKey.toString();
-          const walletDiv = document.getElementById('wallet-address');
-          walletDiv.innerHTML = `
-            <span style="font-weight:600;">Wallet:</span> <span id="wallet-short">${publicKey.slice(0, 4)}...${publicKey.slice(-4)}</span>
-            <span id="wallet-full" style="display:none;">${publicKey}</span>
-            <button id="copy-btn">Copy</button>
-            <button id="disconnect-btn">Disconnect</button>
-            <span id="balance-info" style="margin-left:12px;">| Loading balance...</span>
-          `;
-          walletDiv.style.display = 'block';
-          document.getElementById('connect').style.display = 'none';
-          document.getElementById('log').textContent = 'Wallet connected.';
-          // Copy button
-          document.getElementById('copy-btn').onclick = () => copyAddress(publicKey);
-          // Disconnect button
-          document.getElementById('disconnect-btn').onclick = disconnectPhantom;
-          // Fetch balance
-          const balance = await fetchSolBalance(publicKey);
-          document.getElementById('balance-info').textContent = balance !== null ? `| Balance: ${balance.toFixed(4)} SOL` : '| Balance: N/A';
-        } catch (err) {
-          document.getElementById('log').textContent = 'Connection to Phantom was cancelled or failed.';
-        }
-      } else {
-        window.open('https://phantom.app/', '_blank');
-      }
-    }
+    import nacl from "https://cdn.skypack.dev/tweetnacl@1.0.3";
+    import bs58 from "https://cdn.skypack.dev/bs58@5.0.0";
 
-    document.getElementById('connect').addEventListener('click', connectPhantom);
+    document.getElementById("connect").addEventListener("click", () => {
+      const keypair = nacl.box.keyPair();
+      const dappPublicKey = bs58.encode(keypair.publicKey);
+      const dappSecretKey = bs58.encode(keypair.secretKey);
 
-    // Fetch SOL balance from Solana mainnet
-    async function fetchSolBalance(address) {
-      try {
-        const response = await fetch('https://api.mainnet-beta.solana.com', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            jsonrpc: '2.0',
-            id: 1,
-            method: 'getBalance',
-            params: [address]
-          })
-        });
-        const data = await response.json();
-        if (data && data.result && typeof data.result.value === 'number') {
-          // Convert lamports to SOL
-          return data.result.value / 1e9;
-        }
-      } catch (e) {}
-      return null;
-    }
+      localStorage.setItem("dapp_secret_key", dappSecretKey);
 
-    // Add: On load, check if already connected
-    window.addEventListener('DOMContentLoaded', async () => {
-      if (window.solana && window.solana.isPhantom) {
-        try {
-          // Try to auto-connect if already approved
-          const resp = await window.solana.connect({ onlyIfTrusted: true });
-          if (resp && resp.publicKey) {
-            const publicKey = resp.publicKey.toString();
-            const walletDiv = document.getElementById('wallet-address');
-            walletDiv.textContent = `Wallet: ${publicKey.slice(0, 4)}...${publicKey.slice(-4)} | Loading balance...`;
-            walletDiv.style.display = 'block';
-            const balance = await fetchSolBalance(publicKey);
-            if (balance !== null) {
-              walletDiv.textContent = `Wallet: ${publicKey.slice(0, 4)}...${publicKey.slice(-4)} | Balance: ${balance.toFixed(4)} SOL`;
-            } else {
-              walletDiv.textContent = `Wallet: ${publicKey.slice(0, 4)}...${publicKey.slice(-4)} | Balance: N/A`;
-            }
-            document.getElementById('connect').style.display = 'none';
-            document.getElementById('log').textContent = 'Wallet connected.';
-          }
-        } catch (e) {}
-      }
+      const redirectLink = "https://crpt1ai.github.io/phantom/phantom-redirect.html";
+      const url = new URL("https://phantom.app/ul/v1/connect");
+
+      url.searchParams.set("dapp_encryption_public_key", dappPublicKey);
+      url.searchParams.set("redirect_link", redirectLink);
+      url.searchParams.set("app_url", "https://crpt1ai.github.io/phantom/");
+      url.searchParams.set("cluster", "mainnet-beta");
+
+      document.getElementById("log").textContent = "Launching Phantom...";
+
+      setTimeout(() => {
+        window.location.href = url.toString();
+      }, 100);
+      window.location.href = url.toString().replace("https://", "phantom://");
     });
-
-    // Add: Disconnect functionality
-    function disconnectPhantom() {
-      if (window.solana && window.solana.isPhantom) {
-        window.solana.disconnect();
-        document.getElementById('wallet-address').style.display = 'none';
-        document.getElementById('connect').style.display = 'inline-block';
-        document.getElementById('log').textContent = 'Disconnected. Open your wallet to get started.';
-      }
-    }
-
-    // Add: Copy address to clipboard
-    function copyAddress(address) {
-      navigator.clipboard.writeText(address);
-      const walletDiv = document.getElementById('wallet-address');
-      const oldText = walletDiv.textContent;
-      walletDiv.textContent = 'Copied!';
-      setTimeout(() => { walletDiv.textContent = oldText; }, 1200);
-    }
-
-    // Add: Show full address on click (toggle)
-    document.addEventListener('click', function(e) {
-      const short = document.getElementById('wallet-short');
-      const full = document.getElementById('wallet-full');
-      if (short && full && (e.target === short || e.target === full)) {
-        if (full.style.display === 'none') {
-          short.style.display = 'none';
-          full.style.display = 'inline';
-        } else {
-          short.style.display = 'inline';
-          full.style.display = 'none';
-        }
-      }
-    });
-
-    // Remove old redirect/deep link logic and showWalletAddressAndBalance
-    // Only use direct Phantom connection
   </script>
 </body>
 </html>
