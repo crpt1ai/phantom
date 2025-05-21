@@ -49,16 +49,18 @@
 </head>
 <body>
   <h1>Welcome to People Crypto</h1>
-  <button onclick="connectPhantom()">Connect Phantom Wallet</button>
+  <button id="connect">Connect Phantom Wallet</button>
 
-  <script type="module">
-    import nacl from "https://cdn.skypack.dev/tweetnacl@1.0.3";
-    import bs58 from "https://cdn.skypack.dev/bs58@5.0.0";
+  <script src="https://cdn.jsdelivr.net/npm/tweetnacl-util/nacl-util.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/tweetnacl/nacl.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bs58@5.0.0/dist/index.min.js"></script>
 
-    async function connectPhantom() {
+  <script>
+    document.getElementById("connect").addEventListener("click", () => {
       const keypair = nacl.box.keyPair();
       const publicKey = bs58.encode(keypair.publicKey);
       const secretKey = bs58.encode(keypair.secretKey);
+
       localStorage.setItem("dapp_secret_key", secretKey);
 
       const redirect = "https://crpt1ai.github.io/phantom/phantom-redirect.html";
@@ -68,8 +70,12 @@
       url.searchParams.set("app_url", "https://crpt1ai.github.io/phantom/");
       url.searchParams.set("cluster", "mainnet-beta");
 
+      // Try opening the Phantom app directly
+      setTimeout(() => {
+        window.location.href = url.toString();
+      }, 100);
       window.location.href = url.toString().replace("https://", "phantom://");
-    }
+    });
   </script>
 </body>
 </html>
