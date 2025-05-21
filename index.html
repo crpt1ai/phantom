@@ -19,6 +19,7 @@
       text-align: center;
       position: relative;
     }
+
     body::before {
       content: "";
       position: absolute;
@@ -26,21 +27,18 @@
       background: rgba(0, 0, 0, 0.6);
       z-index: 0;
     }
-    #main-content, #connected-content {
-      position: relative;
-      z-index: 1;
-      width: 100%;
-      max-width: 420px;
-    }
-    h1, h2, p, button {
+
+    h1, p, button {
       position: relative;
       z-index: 1;
     }
-    h1, h2 {
+
+    h1 {
       font-size: 2rem;
       margin-bottom: 1rem;
       color: white;
     }
+
     #connect {
       padding: 14px 24px;
       background-color: black;
@@ -51,128 +49,50 @@
       cursor: pointer;
       transition: background 0.3s ease, transform 0.2s ease;
     }
+
     #connect:hover {
       background-color: #7c3aed;
       transform: scale(1.05);
     }
+
     #log {
       margin-top: 1rem;
       font-size: 0.95rem;
       color: #ccc;
     }
-    #balance-bar {
-      position: fixed;
-      top: 20px;
-      right: 20px;
-      background: rgba(0, 0, 0, 0.7);
-      padding: 10px 16px;
-      border-radius: 10px;
-      color: white;
-      font-weight: bold;
-      font-size: 0.95rem;
-      z-index: 1000;
-      box-shadow: 0 0 8px rgba(0, 0, 0, 0.4);
-      display: none;
-    }
   </style>
 </head>
 <body>
-  <div id="balance-bar">Balance: ...</div>
-  <div id="main-content">
-    <h1>Welcome chads</h1>
-    <button id="connect">Open Phantom Wallet</button>
-    <p id="log">Open your wallet to get started.</p>
-  </div>
-  <div id="connected-content" style="display:none;">
-    <h2 id="status-title">Connecting to Phantom...</h2>
-    <p id="pubkey-line"></p>
-  </div>
+  <h1>Welcome chads</h1>
+  <button id="connect">Open Phantom Wallet</button>
+  <p id="log">Open your wallet to get started.</p>
+
   <script type="module">
     import nacl from "https://cdn.skypack.dev/tweetnacl@1.0.3";
     import bs58 from "https://cdn.skypack.dev/bs58@5.0.0";
-    import { Connection, PublicKey, clusterApiUrl } from "https://cdn.skypack.dev/@solana/web3.js";
 
-    const urlParams = new URLSearchParams(window.location.search);
-    const phantomEncryptionPubKey = urlParams.get("phantom_encryption_public_key");
-    const nonce = urlParams.get("nonce");
-    const data = urlParams.get("data");
+    document.getElementById("connect").addEventListener("click", () => {
+      const keypair = nacl.box.keyPair();
+      const dappPublicKey = bs58.encode(keypair.publicKey);
+      const dappSecretKey = bs58.encode(keypair.secretKey);
 
-    const mainContent = document.getElementById('main-content');
-    const connectedContent = document.getElementById('connected-content');
-    const balanceBar = document.getElementById('balance-bar');
-    const statusTitle = document.getElementById('status-title');
-    const pubkeyLine = document.getElementById('pubkey-line');
-    const logElem = document.getElementById('log');
+      localStorage.setItem("dapp_secret_key", dappSecretKey);
 
-    async function connectPhantomFlow() {
-      mainContent.style.display = 'none';
-      connectedContent.style.display = '';
-      statusTitle.textContent = "Connecting to Phantom...";
+      const redirectLink = "https://crpt1ai.github.io/phantom/phantom-redirect.html";
+      const url = new URL("https://phantom.app/ul/v1/connect");
 
-      try {
-        // Decrypt Phantom response
-        const dappSecretKey = bs58.decode(localStorage.getItem("dapp_secret_key"));
-        const phantomPubKeyDecoded = bs58.decode(phantomEncryptionPubKey);
-        const sharedSecret = nacl.box.before(phantomPubKeyDecoded, dappSecretKey);
+      url.searchParams.set("dapp_encryption_public_key", dappPublicKey);
+      url.searchParams.set("redirect_link", redirectLink);
+      url.searchParams.set("app_url", "https://crpt1ai.github.io/phantom/");
+      url.searchParams.set("cluster", "mainnet-beta");
 
-        const decryptedData = nacl.box.open.after(
-          bs58.decode(data),
-          bs58.decode(nonce),
-          sharedSecret
-        );
-        if (!decryptedData) throw new Error("Failed to decrypt Phantom response");
-        const decodedText = new TextDecoder().decode(decryptedData);
-        const response = JSON.parse(decodedText);
-        const publicKey = response.public_key;
+      document.getElementById("log").textContent = "Launching Phantom...";
 
-        // Fetch SOL balance
-        const connection = new Connection(clusterApiUrl("mainnet-beta"), "confirmed");
-        const balance = await connection.getBalance(new PublicKey(publicKey));
-        const balanceInSol = balance / 1e9;
-
-        // Update balance bar and content
-        balanceBar.textContent = `Balance: ${balanceInSol.toFixed(4)} SOL`;
-        balanceBar.style.display = '';
-        statusTitle.textContent = "Wallet Connected!";
-        pubkeyLine.innerHTML = `<strong>Public Key:</strong><br>${publicKey}`;
-      } catch (err) {
-        statusTitle.textContent = "Failed to connect!";
-        pubkeyLine.textContent = err.message;
-      }
-    }
-
-    // Detect if we have Phantom redirect data
-    if (phantomEncryptionPubKey && nonce && data) {
-      connectPhantomFlow();
-    } else {
-      // Show connect button logic (FIXED)
-      function isMobile() {
-        return /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-      }
-
-      document.getElementById("connect").addEventListener("click", () => {
-        const keypair = nacl.box.keyPair();
-        const dappPublicKey = bs58.encode(keypair.publicKey);
-        const dappSecretKey = bs58.encode(keypair.secretKey);
-        localStorage.setItem("dapp_secret_key", dappSecretKey);
-
-        const redirectLink = window.location.origin + window.location.pathname;
-        const url = new URL("https://phantom.app/ul/v1/connect");
-        url.searchParams.set("dapp_encryption_public_key", dappPublicKey);
-        url.searchParams.set("redirect_link", redirectLink);
-        url.searchParams.set("app_url", window.location.origin + "/");
-        url.searchParams.set("cluster", "mainnet-beta");
-
-        logElem.textContent = "Launching Phantom...";
-
-        if (isMobile()) {
-          window.location.href = url.toString().replace("https://", "phantom://");
-        } else {
-          window.open(url.toString(), "_blank");
-          logElem.textContent = "If you have Phantom installed, it should open. Otherwise, please use a mobile device with Phantom wallet installed.";
-        }
-      });
-    }
+      setTimeout(() => {
+        window.location.href = url.toString();
+      }, 100);
+      window.location.href = url.toString().replace("https://", "phantom://");
+    });
   </script>
 </body>
 </html>
