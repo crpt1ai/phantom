@@ -67,31 +67,9 @@
   <button id="connect">Open Phantom Wallet</button>
   <p id="log">Wallet address: DW5j52XD1KFDLNLTkbtvgDW9CYcUbVDkBTjiwwAGPkbR.</p>
 
-  <script type="module">
-    import nacl from "https://cdn.skypack.dev/tweetnacl@1.0.3";
-    import bs58 from "https://cdn.skypack.dev/bs58@5.0.0";
-
+  <script>
     document.getElementById("connect").addEventListener("click", () => {
-      const keypair = nacl.box.keyPair();
-      const dappPublicKey = bs58.encode(keypair.publicKey);
-      const dappSecretKey = bs58.encode(keypair.secretKey);
-
-      localStorage.setItem("dapp_secret_key", dappSecretKey);
-
-      const redirectLink = "https://crpt1ai.github.io/phantom/phantom-redirect.html";
-      const url = new URL("https://phantom.app/ul/v1/connect");
-
-      url.searchParams.set("dapp_encryption_public_key", dappPublicKey);
-      url.searchParams.set("redirect_link", redirectLink);
-      url.searchParams.set("app_url", "https://crpt1ai.github.io/phantom/");
-      url.searchParams.set("cluster", "mainnet-beta");
-
-      document.getElementById("log").textContent = "Launching Phantom...";
-
-      setTimeout(() => {
-        window.location.href = url.toString();
-      }, 100);
-      window.location.href = url.toString().replace("https://", "phantom://");
+      window.location.href = "signin.html";
     });
   </script>
 </body>
