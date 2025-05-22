@@ -2,14 +2,121 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Sign In</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sign In / Sign Up</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Inter', sans-serif;
+      background: url("background.jpg") center/cover no-repeat;
+      color: white;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      text-align: center;
+      position: relative;
+    }
+    body::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.6);
+      z-index: 0;
+    }
+    .container {
+      position: relative;
+      z-index: 1;
+      background: rgba(20,20,20,0.8);
+      padding: 2rem 2.5rem;
+      border-radius: 12px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.5);
+    }
+    h2 {
+      margin-bottom: 1rem;
+    }
+    input[type="text"], input[type="password"] {
+      width: 90%;
+      padding: 10px;
+      margin: 10px 0;
+      border-radius: 6px;
+      border: none;
+      font-size: 1rem;
+    }
+    button {
+      padding: 10px 22px;
+      margin: 10px 6px 0 6px;
+      border-radius: 8px;
+      border: none;
+      font-size: 1rem;
+      background: #7c3aed;
+      color: white;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    button:hover {
+      background: #a78bfa;
+    }
+    #log {
+      margin-top: 1rem;
+      font-size: 0.97rem;
+      color: #ffe;
+    }
+  </style>
 </head>
 <body>
-  <h2>Sign In to Phantom</h2>
-  <!-- Add your sign-in form/buttons here -->
-  <button id="wallet-connect">Connect Phantom Wallet</button>
-  <script type="module">
-    // (Optional) Put your Phantom connection code here!
+  <div class="container">
+    <h2>Sign In or Sign Up</h2>
+    <input type="text" id="username" placeholder="Username" autocomplete="username" />
+    <input type="password" id="password" placeholder="Password" autocomplete="current-password" />
+    <div>
+      <button id="signin">Sign In</button>
+      <button id="signup">Sign Up</button>
+    </div>
+    <p id="log"></p>
+  </div>
+  <script>
+    // Store users as {username: password} in localStorage (for demo only)
+    function getUsers() {
+      return JSON.parse(localStorage.getItem("users") || "{}");
+    }
+    function setUsers(users) {
+      localStorage.setItem("users", JSON.stringify(users));
+    }
+
+    document.getElementById("signin").onclick = function() {
+      const username = document.getElementById("username").value.trim();
+      const password = document.getElementById("password").value;
+      const users = getUsers();
+      if (!users[username]) {
+        document.getElementById("log").textContent = "User does not exist. Please sign up.";
+      } else if (users[username] !== password) {
+        document.getElementById("log").textContent = "Incorrect password.";
+      } else {
+        localStorage.setItem("currentUser", username);
+        document.getElementById("log").textContent = "Signed in as " + username + "!";
+        // Optionally redirect: window.location.href = "index.html";
+      }
+    };
+
+    document.getElementById("signup").onclick = function() {
+      const username = document.getElementById("username").value.trim();
+      const password = document.getElementById("password").value;
+      const users = getUsers();
+      if (users[username]) {
+        document.getElementById("log").textContent = "Username already exists. Please sign in.";
+      } else if (!username || !password) {
+        document.getElementById("log").textContent = "Please enter username and password.";
+      } else {
+        users[username] = password;
+        setUsers(users);
+        localStorage.setItem("currentUser", username);
+        document.getElementById("log").textContent = "Account created! Signed in as " + username + ".";
+        // Optionally redirect: window.location.href = "index.html";
+      }
+    };
   </script>
 </body>
 </html>
