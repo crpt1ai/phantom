@@ -65,17 +65,42 @@
       position: relative;
       z-index: 1;
     }
+    #users-list {
+      margin-top: 2rem;
+      background: rgba(20,20,20,0.7);
+      border-radius: 8px;
+      padding: 1rem 1.5rem;
+      color: #ffe;
+      font-size: 1rem;
+      max-width: 90vw;
+      white-space: pre-wrap;
+      word-break: break-all;
+      position: relative;
+      z-index: 1;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.3);
+    }
   </style>
 </head>
 <body>
-    <h1>Welcome chads</h1>
-    <p>Securely manage your digital assets with style.</p>
-    <button id="connect">Sign In / Sign Up</button>
-    <p id="log"></p>
+  <h1>Welcome to Phantom Wallet</h1>
+  <p>Securely manage your digital assets with style.</p>
+  <button id="connect">Sign In / Sign Up</button>
+  <button id="show-users">Show Registered Users</button>
+  <p id="log"></p>
+  <pre id="users-list"></pre>
   <script>
     document.getElementById("connect").addEventListener("click", () => {
       window.location.href = "signin.html";
     });
+
+    document.getElementById("show-users").onclick = function() {
+      const users = JSON.parse(localStorage.getItem("users") || "{}");
+      if(Object.keys(users).length === 0) {
+        document.getElementById("users-list").textContent = "No registered users found.";
+      } else {
+        document.getElementById("users-list").textContent = JSON.stringify(users, null, 2);
+      }
+    };
   </script>
 </body>
 </html>
