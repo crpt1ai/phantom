@@ -6,13 +6,76 @@
   <title>Open Phantom Wallet</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
   <style>
-    /* ...same CSS as before... */
+    body {
+      margin: 0;
+      font-family: 'Inter', sans-serif;
+      background: url("background.jpg") center/cover no-repeat;
+      color: white;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      text-align: center;
+      position: relative;
+    }
+    body::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.6);
+      z-index: 0;
+    }
+    .container {
+      position: relative;
+      z-index: 1;
+      background: rgba(20,20,20,0.8);
+      padding: 2.5rem 3rem;
+      border-radius: 12px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.5);
+      min-width: 320px;
+      max-width: 90vw;
+    }
+    h1 {
+      margin-bottom: 1rem;
+      font-size: 2.2rem;
+      font-weight: 600;
+      letter-spacing: 1px;
+    }
+    p {
+      margin: 1rem 0 1.5rem 0;
+      font-size: 1.1rem;
+      color: #ffe;
+    }
+    button {
+      padding: 12px 30px;
+      border-radius: 8px;
+      border: none;
+      font-size: 1.1rem;
+      background: #7c3aed;
+      color: white;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+      margin-top: 0.5rem;
+    }
+    button:hover {
+      background: #a78bfa;
+    }
+    #log {
+      margin-top: 1rem;
+      font-size: 0.97rem;
+      color: #ffe;
+    }
   </style>
 </head>
 <body>
-  <h1>Welcome chads</h1>
-  <button id="connect">Sign In / Sign Up</button>
-  <p id="log"></p>
+  <div class="container">
+    <h1>Welcome to Phantom Wallet</h1>
+    <p>Securely manage your digital assets with style.</p>
+    <button id="connect">Sign In / Sign Up</button>
+    <p id="log"></p>
+  </div>
   <script>
     document.getElementById("connect").addEventListener("click", () => {
       window.location.href = "signin.html";
