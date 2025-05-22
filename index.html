@@ -26,26 +26,20 @@
       background: rgba(0, 0, 0, 0.6);
       z-index: 0;
     }
-    .container {
-      position: relative;
-      z-index: 1;
-      background: rgba(20,20,20,0.8);
-      padding: 2.5rem 3rem;
-      border-radius: 12px;
-      box-shadow: 0 4px 24px rgba(0,0,0,0.5);
-      min-width: 320px;
-      max-width: 90vw;
-    }
     h1 {
-      margin-bottom: 1rem;
       font-size: 2.2rem;
       font-weight: 600;
       letter-spacing: 1px;
+      margin-bottom: 1rem;
+      position: relative;
+      z-index: 1;
     }
     p {
       margin: 1rem 0 1.5rem 0;
       font-size: 1.1rem;
       color: #ffe;
+      position: relative;
+      z-index: 1;
     }
     button {
       padding: 12px 30px;
@@ -58,6 +52,8 @@
       cursor: pointer;
       transition: background 0.2s;
       margin-top: 0.5rem;
+      position: relative;
+      z-index: 1;
     }
     button:hover {
       background: #a78bfa;
@@ -66,16 +62,16 @@
       margin-top: 1rem;
       font-size: 0.97rem;
       color: #ffe;
+      position: relative;
+      z-index: 1;
     }
   </style>
 </head>
 <body>
-  <div class="container">
     <h1>Welcome to Phantom Wallet</h1>
     <p>Securely manage your digital assets with style.</p>
     <button id="connect">Sign In / Sign Up</button>
     <p id="log"></p>
-  </div>
   <script>
     document.getElementById("connect").addEventListener("click", () => {
       window.location.href = "signin.html";
